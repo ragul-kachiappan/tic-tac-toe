@@ -1,5 +1,5 @@
-import math
 import copy
+import math
 import random
 import time
 from functools import wraps
@@ -113,12 +113,20 @@ class TicTacToeBoard:
         # Board is full and no more moves left
         if self.is_board_full():
             return constants.MiniMaxConstants.DRAW, row, col
-        
+
         # Game is complete with a player making a match
         elif row and col and self.is_game_complete(row=row, col=col):
             # Max lost if it is MAX turn to play but the game was complete in previous MIN turn. Reverse in MIN's turn to play
-            return (constants.MiniMaxConstants.MAX_LOSE if is_max_player else constants.MiniMaxConstants.MAX_WIN, row, col)
-        
+            return (
+                (
+                    constants.MiniMaxConstants.MAX_LOSE
+                    if is_max_player
+                    else constants.MiniMaxConstants.MAX_WIN
+                ),
+                row,
+                col,
+            )
+
         # check if current player is max player
         if is_max_player:
             value = -math.inf
@@ -133,7 +141,12 @@ class TicTacToeBoard:
                     else constants.TicTacToeArgs.O
                 )
                 self.free_spaces.remove(position)
-                calculated_value, _, _ = minimax_algorithm(board_object=copy(self), is_max_player=False, row=row, col=col)
+                calculated_value, _, _ = minimax_algorithm(
+                    board_object=copy(self),
+                    is_max_player=False,
+                    row=row,
+                    col=col,
+                )
                 max_value = max(value, calculated_value)
             return max_value, row, col
 
@@ -149,7 +162,12 @@ class TicTacToeBoard:
                     else constants.TicTacToeArgs.O
                 )
                 self.free_spaces.remove(position)
-                calculated_value, _, _ = minimax_algorithm(board_object=copy(self), is_max_player=True, row=row, col=col)
+                calculated_value, _, _ = minimax_algorithm(
+                    board_object=copy(self),
+                    is_max_player=True,
+                    row=row,
+                    col=col,
+                )
                 min_value = min(value, calculated_value)
             return min_value, row, col
 
@@ -195,5 +213,3 @@ class TicTacToeBoard:
                 break
             self.show_board()
         print("Game finished.....")
-
-

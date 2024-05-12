@@ -13,6 +13,7 @@ class TicTacToeArgs(IntEnum):
     O = 0  # noqa
     X = 1  # noqa
 
+
 class MiniMaxConstants(IntEnum):
     MAX_WIN = 1
     DRAW = 0
