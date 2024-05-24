@@ -1,11 +1,8 @@
 import copy
-import math
 import random
-import time
 from functools import wraps
 
-from app_utils import constants, exceptions
-from app_utils.minimax import minimax_algorithm
+from app_utils import constants, exceptions, minimax
 
 
 def action_checks(action_func):
@@ -70,6 +67,9 @@ class TicTacToeBoard:
 
         return check_consecutive_marks
 
+    def get_location_number(self, row_index: int, col_index: int):
+        return row_index * constants.BOARD_SIZE + col_index
+
     @action_checks
     def user_action(self, position: int):
         row = position // constants.BOARD_SIZE
@@ -101,78 +101,91 @@ class TicTacToeBoard:
         return row, col
 
     # TODO think about performance optimizations
-    def minimax_algorithm(
-        self,
-        is_max_player: bool = True,
-        row: int | None = None,
-        col: int | None = None,
-    ) -> int:
-        # TODO Add proper documentation
+    # def minimax_algorithm(
+    #     self,
+    #     is_max_player: bool = True,
+    #     row: int | None = None,
+    #     col: int | None = None,
+    # ) -> int:
+    #     # TODO Add proper documentation
 
-        # Terminal state check
-        # Board is full and no more moves left
-        if self.is_board_full():
-            return constants.MiniMaxConstants.DRAW, row, col
+    #     # Terminal state check
+    #     # Board is full and no more moves left
+    #     if self.is_board_full():
+    #         return constants.MiniMaxConstants.DRAW, row, col
 
-        # Game is complete with a player making a match
-        elif row and col and self.is_game_complete(row=row, col=col):
-            # Max lost if it is MAX turn to play but the game was complete in previous MIN turn. Reverse in MIN's turn to play
-            return (
-                (
-                    constants.MiniMaxConstants.MAX_LOSE
-                    if is_max_player
-                    else constants.MiniMaxConstants.MAX_WIN
-                ),
-                row,
-                col,
-            )
+    #     # Game is complete with a player making a match
+    #     elif row and col and self.is_game_complete(row=row, col=col):
+    #         # Max lost if it is MAX turn to play but the game was complete in previous MIN turn. Reverse in MIN's turn to play
+    #         return (
+    #             (
+    #                 constants.MiniMaxConstants.MAX_LOSE
+    #                 if is_max_player
+    #                 else constants.MiniMaxConstants.MAX_WIN
+    #             ),
+    #             row,
+    #             col,
+    #         )
 
-        # check if current player is max player
-        if is_max_player:
-            value = -math.inf
-            # for some combinations
-            # need to loop through free spaces and get it right
-            for position in self.free_spaces:
-                row = position // constants.BOARD_SIZE
-                col = position % constants.BOARD_SIZE
-                self.board[row][col] = (
-                    constants.TicTacToeArgs.X
-                    if self.start_role == constants.Role.BOT
-                    else constants.TicTacToeArgs.O
-                )
-                self.free_spaces.remove(position)
-                calculated_value, _, _ = minimax_algorithm(
-                    board_object=copy(self),
-                    is_max_player=False,
-                    row=row,
-                    col=col,
-                )
-                max_value = max(value, calculated_value)
-            return max_value, row, col
+    #     # check if current player is max player
+    #     if is_max_player:
+    #         value = -math.inf
+    #         # for some combinations
+    #         # need to loop through free spaces and get it right
+    #         for position in self.free_spaces:
+    #             row = position // constants.BOARD_SIZE
+    #             col = position % constants.BOARD_SIZE
+    #             self.board[row][col] = (
+    #                 constants.TicTacToeArgs.X
+    #                 if self.start_role == constants.Role.BOT
+    #                 else constants.TicTacToeArgs.O
+    #             )
+    #             self.free_spaces.remove(position)
+    #             calculated_value, _, _ = minimax_algorithm(
+    #                 board_object=copy(self),
+    #                 is_max_player=False,
+    #                 row=row,
+    #                 col=col,
+    #             )
+    #             max_value = max(value, calculated_value)
+    #         return max_value, row, col
 
-        else:
-            value = math.inf
-            # for loop to go thru possible actions
-            for position in self.free_spaces:
-                row = position // constants.BOARD_SIZE
-                col = position % constants.BOARD_SIZE
-                self.board[row][col] = (
-                    constants.TicTacToeArgs.X
-                    if self.start_role == constants.Role.BOT
-                    else constants.TicTacToeArgs.O
-                )
-                self.free_spaces.remove(position)
-                calculated_value, _, _ = minimax_algorithm(
-                    board_object=copy(self),
-                    is_max_player=True,
-                    row=row,
-                    col=col,
-                )
-                min_value = min(value, calculated_value)
-            return min_value, row, col
+    #     else:
+    #         value = math.inf
+    #         # for loop to go thru possible actions
+    #         for position in self.free_spaces:
+    #             row = position // constants.BOARD_SIZE
+    #             col = position % constants.BOARD_SIZE
+    #             self.board[row][col] = (
+    #                 constants.TicTacToeArgs.X
+    #                 if self.start_role == constants.Role.BOT
+    #                 else constants.TicTacToeArgs.O
+    #             )
+    #             self.free_spaces.remove(position)
+    #             calculated_value, _, _ = minimax_algorithm(
+    #                 board_object=copy(self),
+    #                 is_max_player=True,
+    #                 row=row,
+    #                 col=col,
+    #             )
+    #             min_value = min(value, calculated_value)
+    #         return min_value, row, col
 
+    @action_checks
     def minimax_ai_action(self):
-        raise NotImplementedError()
+        possibility, row, col = minimax.minimax_algorithm(
+            state=copy.deepcopy(self.board),
+            free_spaces=copy.deepcopy(self.free_spaces),
+            start_role=copy.deepcopy(self.start_role),
+        )
+        choice = self.get_location_number(row, col)
+        self.board[row][col] = (
+            constants.TicTacToeArgs.X
+            if self.start_role == constants.Role.BOT
+            else constants.TicTacToeArgs.O
+        )
+        self.free_spaces.remove(choice)
+        return row, col
 
     def ml_ai_action(self):
         raise NotImplementedError()
@@ -197,12 +210,10 @@ class TicTacToeBoard:
                 print("User wins!!!")
                 self.show_board()
                 break
-            time.sleep(1)
             print("AI is thinking")
-            time.sleep(3)
             print("Doing AI action")
             try:
-                self.random_ai_action()
+                self.minimax_ai_action()
             except exceptions.BoardFullException:
                 print("Board is full....")
                 self.show_board()
@@ -213,3 +224,8 @@ class TicTacToeBoard:
                 break
             self.show_board()
         print("Game finished.....")
+
+
+if __name__ == "__main__":
+    t = TicTacToeBoard()
+    t.play()
