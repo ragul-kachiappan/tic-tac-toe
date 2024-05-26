@@ -1,10 +1,8 @@
 import copy
 import random
-import time
 from functools import wraps
 
-from tic_tac_toe_game import constants
-from tic_tac_toe_game.app_utils import exceptions
+from app_utils import constants, exceptions, minimax
 
 
 def action_checks(action_func):
@@ -23,8 +21,11 @@ def action_checks(action_func):
 
 # NOTE Assume board size is 3x3 for now
 class TicTacToeBoard:
-    def __init__(self, start_role: int = constants.Role.USER) -> None:
+    def __init__(self, start_role: int = constants.Role.USER):
         self.start_role = start_role
+        self._reset()
+
+    def _reset(self):
         # NOTE always have deep copy. Shallow copy will mess up the matrix
         row = [constants.TicTacToeArgs.EMPTY] * constants.BOARD_SIZE
         self.board = [copy.deepcopy(row) for _ in range(constants.BOARD_SIZE)]
@@ -34,6 +35,9 @@ class TicTacToeBoard:
 
     def is_board_full(self):
         return len(self.free_spaces) == 0
+
+    def clear_board(self):
+        self._reset()
 
     def is_game_complete(self, row: int, col: int) -> bool:
         check_row = map(lambda x: x == self.board[row][col], self.board[row])
@@ -69,6 +73,9 @@ class TicTacToeBoard:
 
         return check_consecutive_marks
 
+    def get_location_number(self, row_index: int, col_index: int):
+        return row_index * constants.BOARD_SIZE + col_index
+
     @action_checks
     def user_action(self, position: int):
         row = position // constants.BOARD_SIZE
@@ -99,8 +106,22 @@ class TicTacToeBoard:
         self.free_spaces.remove(choice)
         return row, col
 
+    # TODO alpha beta pruning and other performance optimizations
+    @action_checks
     def minimax_ai_action(self):
-        raise NotImplementedError()
+        possibility, row, col = minimax.minimax_algorithm(  # noqa
+            state=copy.deepcopy(self.board),
+            free_spaces=copy.deepcopy(self.free_spaces),
+            start_role=copy.deepcopy(self.start_role),
+        )
+        choice = self.get_location_number(row, col)
+        self.board[row][col] = (
+            constants.TicTacToeArgs.X
+            if self.start_role == constants.Role.BOT
+            else constants.TicTacToeArgs.O
+        )
+        self.free_spaces.remove(choice)
+        return row, col
 
     def ml_ai_action(self):
         raise NotImplementedError()
@@ -125,12 +146,10 @@ class TicTacToeBoard:
                 print("User wins!!!")
                 self.show_board()
                 break
-            time.sleep(1)
             print("AI is thinking")
-            time.sleep(3)
             print("Doing AI action")
             try:
-                self.random_ai_action()
+                self.minimax_ai_action()
             except exceptions.BoardFullException:
                 print("Board is full....")
                 self.show_board()
