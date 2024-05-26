@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Slick Tic Tac Toe</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css')}}">
+    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
 </head>
 <body>
     <header>
@@ -13,8 +14,7 @@
         </nav>
     </header>
     <main>
-        <div class="board">
-            <!-- <div class="cell"></div> -->
+        <div class="board" id="game-board">
             {% for row in board %}
                 {% for item in row %}
                     {% if item.value == 1 %}
@@ -22,7 +22,12 @@
                     {% elif item.value == 0 %}
                         <div class="cell">O</div>
                     {% else %}
-                        <div class="cell"></div>
+                        <div class="cell"
+                        hx-post="/"
+                        hx-include="[name=position]"
+                        hx-vals="{'position': '{{ loop.index0 }}'}"
+                        hx-swap="innerHTML"
+                        hx-target="#game-board"> </div>
                     {% endif %}
                 {% endfor %}
             {% endfor %}

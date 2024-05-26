@@ -1,0 +1,16 @@
+{% for row in board %}
+    {% for item in row %}
+        {% if item.value == 1 %}
+            <div class="cell">X</div>
+        {% elif item.value == 0 %}
+            <div class="cell">O</div>
+        {% else %}
+            <div class="cell"
+            hx-post="/"
+            hx-include="[name=position]"
+            hx-vals="{'position': '{{ loop.index0 }}'}"
+            hx-swap="innerHTML"
+            hx-target="#game-board"> </div>
+        {% endif %}
+    {% endfor %}
+{% endfor %}
