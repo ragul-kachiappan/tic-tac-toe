@@ -14,15 +14,18 @@
     </header>
     <main>
         <div class="board">
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
+            <!-- <div class="cell"></div> -->
+            {% for row in board %}
+                {% for item in row %}
+                    {% if item.value == 1 %}
+                        <div class="cell">X</div>
+                    {% elif item.value == 0 %}
+                        <div class="cell">O</div>
+                    {% else %}
+                        <div class="cell"></div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
         </div>
     </main>
 </body>

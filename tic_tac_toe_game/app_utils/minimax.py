@@ -19,7 +19,7 @@ Minimax(s: state):
 import copy
 import math
 
-from app_utils import constants
+from tic_tac_toe_game.app_utils import constants
 
 
 def is_game_complete(
