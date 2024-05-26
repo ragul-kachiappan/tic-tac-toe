@@ -21,8 +21,11 @@ def action_checks(action_func):
 
 # NOTE Assume board size is 3x3 for now
 class TicTacToeBoard:
-    def __init__(self, start_role: int = constants.Role.USER) -> None:
+    def __init__(self, start_role: int = constants.Role.USER):
         self.start_role = start_role
+        self._reset()
+
+    def _reset(self):
         # NOTE always have deep copy. Shallow copy will mess up the matrix
         row = [constants.TicTacToeArgs.EMPTY] * constants.BOARD_SIZE
         self.board = [copy.deepcopy(row) for _ in range(constants.BOARD_SIZE)]
@@ -32,6 +35,9 @@ class TicTacToeBoard:
 
     def is_board_full(self):
         return len(self.free_spaces) == 0
+
+    def clear_board(self):
+        self._reset()
 
     def is_game_complete(self, row: int, col: int) -> bool:
         check_row = map(lambda x: x == self.board[row][col], self.board[row])
@@ -100,80 +106,10 @@ class TicTacToeBoard:
         self.free_spaces.remove(choice)
         return row, col
 
-    # TODO think about performance optimizations
-    # def minimax_algorithm(
-    #     self,
-    #     is_max_player: bool = True,
-    #     row: int | None = None,
-    #     col: int | None = None,
-    # ) -> int:
-    #     # TODO Add proper documentation
-
-    #     # Terminal state check
-    #     # Board is full and no more moves left
-    #     if self.is_board_full():
-    #         return constants.MiniMaxConstants.DRAW, row, col
-
-    #     # Game is complete with a player making a match
-    #     elif row and col and self.is_game_complete(row=row, col=col):
-    #         # Max lost if it is MAX turn to play but the game was complete in previous MIN turn. Reverse in MIN's turn to play
-    #         return (
-    #             (
-    #                 constants.MiniMaxConstants.MAX_LOSE
-    #                 if is_max_player
-    #                 else constants.MiniMaxConstants.MAX_WIN
-    #             ),
-    #             row,
-    #             col,
-    #         )
-
-    #     # check if current player is max player
-    #     if is_max_player:
-    #         value = -math.inf
-    #         # for some combinations
-    #         # need to loop through free spaces and get it right
-    #         for position in self.free_spaces:
-    #             row = position // constants.BOARD_SIZE
-    #             col = position % constants.BOARD_SIZE
-    #             self.board[row][col] = (
-    #                 constants.TicTacToeArgs.X
-    #                 if self.start_role == constants.Role.BOT
-    #                 else constants.TicTacToeArgs.O
-    #             )
-    #             self.free_spaces.remove(position)
-    #             calculated_value, _, _ = minimax_algorithm(
-    #                 board_object=copy(self),
-    #                 is_max_player=False,
-    #                 row=row,
-    #                 col=col,
-    #             )
-    #             max_value = max(value, calculated_value)
-    #         return max_value, row, col
-
-    #     else:
-    #         value = math.inf
-    #         # for loop to go thru possible actions
-    #         for position in self.free_spaces:
-    #             row = position // constants.BOARD_SIZE
-    #             col = position % constants.BOARD_SIZE
-    #             self.board[row][col] = (
-    #                 constants.TicTacToeArgs.X
-    #                 if self.start_role == constants.Role.BOT
-    #                 else constants.TicTacToeArgs.O
-    #             )
-    #             self.free_spaces.remove(position)
-    #             calculated_value, _, _ = minimax_algorithm(
-    #                 board_object=copy(self),
-    #                 is_max_player=True,
-    #                 row=row,
-    #                 col=col,
-    #             )
-    #             min_value = min(value, calculated_value)
-    #         return min_value, row, col
-
+    # TODO alpha beta pruning and other performance optimizations
     @action_checks
     def minimax_ai_action(self):
-        possibility, row, col = minimax.minimax_algorithm(
+        possibility, row, col = minimax.minimax_algorithm(  # noqa
             state=copy.deepcopy(self.board),
             free_spaces=copy.deepcopy(self.free_spaces),
             start_role=copy.deepcopy(self.start_role),
