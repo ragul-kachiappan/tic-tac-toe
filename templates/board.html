@@ -1,14 +1,16 @@
 {% for row in board %}
+    {% set outer_loop = loop %}
     {% for item in row %}
         {% if item.value == 1 %}
-            <div class="cell">X</div>
+            <div class="cell" id="div:{{ loop.index0 + 3 * outer_loop.index0 }}">X</div>
         {% elif item.value == 0 %}
-            <div class="cell">O</div>
+            <div class="cell" id="div:{{ loop.index0 + 3 * outer_loop.index0 }}">O</div>
         {% else %}
             <div class="cell"
+            id="div:{{ loop.index0 + 3 * outer_loop.index0 }}"
             hx-post="/"
             hx-include="[name=position]"
-            hx-vals="{'position': '{{ loop.index0 }}'}"
+            hx-vals='{"position": "{{ loop.index0 + 3 * outer_loop.index0 }}"}'
             hx-swap="innerHTML"
             hx-target="#game-board"> </div>
         {% endif %}

@@ -143,6 +143,15 @@ class TicTacToeBoard:
     def ml_ai_action(self):
         raise NotImplementedError()
 
+    def play_ai_action(self, option: constants.AIActionTypes):
+        match option:
+            case constants.AIActionTypes.RANDOM:
+                self.random_ai_action()
+            case constants.AIActionTypes.MINIMAX:
+                self.minimax_ai_action()
+            case constants.AIActionTypes.ML:
+                self.ml_ai_action()
+
     def show_board(self):
         for row in self.board:
             for element in row:

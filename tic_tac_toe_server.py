@@ -1,4 +1,5 @@
 import json
+import time
 
 import uvicorn
 from starlette import exceptions
@@ -8,12 +9,12 @@ from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from tic_tac_toe_game import board
+from tic_tac_toe_game.app_utils import exceptions as tic_tac_toe_exceptions
 
 templates = Jinja2Templates(directory="templates")
 
 
 async def tic_tac_toe_page(request):
-    print(request)
     # TODO get type of ai action from query params
     if request.method == "GET":
         current_board_state_str = request.cookies.get(
@@ -49,11 +50,18 @@ async def tic_tac_toe_page(request):
         return response
 
     if request.method == "POST":
-        data = await request.json()
-        position = data.get("position", None)  # noqa
+        form_data = await request.form()
         current_board_state_str = request.cookies.get(
             "current_board_state", None
         )
+        position = form_data.get("position", None)
+        ai_option = form_data.get("ai_option", None)
+
+        # TODO handle error cases
+        # if not position:
+        #     pass
+        # if not isinstance(position, int):
+        #     pass
         current_free_spaces_str = request.cookies.get(
             "current_free_spaces", None
         )
@@ -76,10 +84,37 @@ async def tic_tac_toe_page(request):
             current_board_state=current_board_state,
             current_free_spaces=current_free_spaces,
         )
+
+        if position:
+            # play user action
+            try:
+                game_board.user_action(position=int(position))
+            except tic_tac_toe_exceptions.BoardFullException:
+                pass
+                # TODO need to show a pop up window that the board is full
+            except tic_tac_toe_exceptions.GameCompleteException:
+                pass
+                # TODO need to show a pop up window that the game is complete and who won
+
+        if ai_option:
+            # play ai action
+            ai_option = int(ai_option)
+            time.sleep(3)
+            try:
+                game_board.play_ai_action(option=ai_option)
+            except tic_tac_toe_exceptions.BoardFullException:
+                pass
+                # TODO need to show a pop up window that the board is full
+            except tic_tac_toe_exceptions.GameCompleteException:
+                pass
+                # TODO need to show a pop up window that the game is complete and who won
+
         context = {"board": game_board.board}
         response = templates.TemplateResponse(
             request, "board.html", context=context
         )
+        if position:
+            response.headers["HX-Trigger"] = "do-ai-action"
         response.set_cookie(
             key="current_board_state", value=json.dumps(game_board.board)
         )
