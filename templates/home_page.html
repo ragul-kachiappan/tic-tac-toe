@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slick Tic Tac Toe</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css')}}">
+    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Slick Tic Tac Toe</h1>
+        </nav>
+    </header>
+
+    <div class="content-wrapper">
+        <aside>
+            <button id="reset-button">Reset Board</button>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="option" value="option1" checked>
+                    Option 1
+                </label>
+                <label>
+                    <input type="radio" name="option" value="option2">
+                    Option 2
+                </label>
+                <label>
+                    <input type="radio" name="option" value="option3">
+                    Option 3
+                </label>
+            </div>
+        </aside>
+
+        <main>
+            <div class="board" id="game-board">
+                {% for row in board %}
+                {% set outer_loop = loop %}
+                {% for item in row %}
+                {% if item.value == 1 %}
+                <div class="cell" id="div:{{ loop.index0 + 3 * outer_loop.index0 }}">X</div>
+                {% elif item.value == 0 %}
+                <div class="cell" id="div:{{ loop.index0 + 3 * outer_loop.index0 }}">O</div>
+                {% else %}
+                <div class="cell"
+                     id="div:{{ loop.index0 + 3 * outer_loop.index0 }}"
+                     hx-post="/"
+                     hx-vals='{"position": "{{ loop.index0 + 3 * outer_loop.index0 }}"}'
+                     hx-swap="innerHTML"
+                     hx-target="#game-board"> </div>
+                {% endif %}
+                {% endfor %}
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

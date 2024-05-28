@@ -18,3 +18,9 @@ class MiniMaxConstants(IntEnum):
     MAX_WIN = 1
     DRAW = 0
     MAX_LOSE = -1
+
+
+class AIActionTypes(IntEnum):
+    RANDOM = 1
+    MINIMAX = 2
+    ML = 3

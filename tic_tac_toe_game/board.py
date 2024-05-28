@@ -2,7 +2,7 @@ import copy
 import random
 from functools import wraps
 
-from app_utils import constants, exceptions, minimax
+from tic_tac_toe_game.app_utils import constants, exceptions, minimax
 
 
 def action_checks(action_func):
@@ -21,9 +21,26 @@ def action_checks(action_func):
 
 # NOTE Assume board size is 3x3 for now
 class TicTacToeBoard:
-    def __init__(self, start_role: int = constants.Role.USER):
+    def __init__(
+        self,
+        current_board_state: list[list[int]] | None = None,
+        current_free_spaces: list[int] | None = None,
+        start_role: int = constants.Role.USER,
+    ):
         self.start_role = start_role
-        self._reset()
+        if current_board_state and current_free_spaces:
+            # TODO need to to error handling
+            # board = list(map(lambda x: constants.TicTacToeArgs(x), itertools.chain(*current_board_state)))
+            # TODO find a better way to do this
+            for i in range(len(current_board_state)):
+                for j in range(len(current_board_state[i])):
+                    current_board_state[i][j] = constants.TicTacToeArgs(
+                        current_board_state[i][j]
+                    )
+            self.board = current_board_state
+            self.free_spaces = current_free_spaces
+        else:
+            self._reset()
 
     def _reset(self):
         # NOTE always have deep copy. Shallow copy will mess up the matrix
@@ -125,6 +142,15 @@ class TicTacToeBoard:
 
     def ml_ai_action(self):
         raise NotImplementedError()
+
+    def play_ai_action(self, option: constants.AIActionTypes):
+        match option:
+            case constants.AIActionTypes.RANDOM:
+                self.random_ai_action()
+            case constants.AIActionTypes.MINIMAX:
+                self.minimax_ai_action()
+            case constants.AIActionTypes.ML:
+                self.ml_ai_action()
 
     def show_board(self):
         for row in self.board:
